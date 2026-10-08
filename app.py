@@ -2,11 +2,13 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, request, jsonify, render_template
 import requests
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
 # API keys are stored in environment variables.
-OMDB_KEY = "7f7598f3"
+OMDB_KEY = os.getenv("OMDB_KEY")
 YOUTUBE_KEY = os.getenv("YOUTUBE_KEY", "")
 
 # Temporary storage (disappears when Flask restarts).
