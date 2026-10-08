@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumiere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-inner">
+    <button class="close-btn" onclick="closeMenu()">✕</button>
+    <p class="browse-label" data-i18n="browse">Browse</p>
+
+    <a href="#" data-label="Top Rated"    data-emoji="⭐" onclick="loadCategory('Top Rated'); closeMenu(); return false;">⭐ Top Rated</a>
+    <a href="#" data-label="Trending"     data-emoji="🔥" onclick="loadCategory('Trending'); closeMenu(); return false;">🔥 Trending</a>
+    <a href="#" data-label="New Releases" data-emoji="🆕" onclick="loadCategory('New Releases'); closeMenu(); return false;">🆕 New Releases</a>
+
+    <a href="#" data-label="Action"   data-emoji="💥" onclick="loadCategory('Action'); closeMenu(); return false;">💥 Action</a>
+    <a href="#" data-label="Drama"    data-emoji="🎭" onclick="loadCategory('Drama'); closeMenu(); return false;">🎭 Drama</a>
+    <a href="#" data-label="Sci-Fi"   data-emoji="🚀" onclick="loadCategory('Sci-Fi'); closeMenu(); return false;">🚀 Sci-Fi</a>
+    <a href="#" data-label="Comedy"   data-emoji="😄" onclick="loadCategory('Comedy'); closeMenu(); return false;">😄 Comedy</a>
+    <a href="#" data-label="Romance"  data-emoji="❤️" onclick="loadCategory('Romance'); closeMenu(); return false;">❤️ Romance</a>
+    <a href="#" data-label="Thriller" data-emoji="🔪" onclick="loadCategory('Thriller'); closeMenu(); return false;">🔪 Thriller</a>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="nav-left">
+    <button class="menu-btn" onclick="openMenu()"><span data-i18n="menu">☰ Menu</span></button>
+    <div class="logo">🎬 Lumiere</div>
+  </div>
+
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Search any movie..." class="search-bar" autocomplete="off">
+    <button class="search-btn" onclick="searchMovie()">⌕</button>
+  </div>
+
+  <div class="nav-right">
+    <select class="language-select" id="languageSelect" onchange="changeLanguage(this.value)">
+      <option value="en">🌐 EN</option>
+      <option value="hi">हिंदी</option>
+      <option value="es">ES</option>
+      <option value="fr">FR</option>
+    </select>
+    <button class="sign-in-btn" id="authBtn" onclick="handleAuthClick()">Sign In</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-eyebrow">✦ Discover Cinema</span>
+  <h2>Rate. Review.<br><em>Remember.</em></h2>
+  <p id="heroText">Your personal movie universe — search movies, explore details and share your rating.</p>
+</section>
+
+<!-- FILTERS -->
+<section class="filters">
+  <button class="filter-btn active" data-cat="Featured" data-label="All"      onclick="loadCategory('Featured')">All</button>
+  <button class="filter-btn" data-cat="Action"   data-label="Action"   onclick="loadCategory('Action')">Action</button>
+  <button class="filter-btn" data-cat="Sci-Fi"   data-label="Sci-Fi"   onclick="loadCategory('Sci-Fi')">Sci-Fi</button>
+  <button class="filter-btn" data-cat="Drama"    data-label="Drama"    onclick="loadCategory('Drama')">Drama</button>
+  <button class="filter-btn" data-cat="Comedy"   data-label="Comedy"   onclick="loadCategory('Comedy')">Comedy</button>
+  <button class="filter-btn" data-cat="Thriller" data-label="Thriller" onclick="loadCategory('Thriller')">Thriller</button>
+  <button class="filter-btn" data-cat="Romance"  data-label="Romance"  onclick="loadCategory('Romance')">Romance</button>
+</section>
+
+<div class="status" id="status"></div>
+
+<div class="section-header">
+  <h2 id="sectionTitle">⭐ Featured Movies</h2>
+  <div class="line"></div>
+</div>
+
+<!-- MOVIE CARDS (filled by script.js) -->
+<section class="movie-container" id="movieContainer"></section>
+
+<footer class="footer">
+  <p>© 2026 Lumiere — Made with ♥ by <span>Firdose</span></p>
+</footer>
+
+<!-- MOVIE DETAILS MODAL -->
+<div class="modal" id="movieModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeMovie()">✕</button>
+
+    <div class="detail-grid">
+      <div>
+        <img id="detailPoster" class="detail-poster" src="" alt="Movie poster">
+      </div>
+
+      <div class="detail-info">
+        <h2 id="detailTitle">Movie</h2>
+        <div class="meta" id="detailMeta"></div>
+
+        <div class="detail-rating">⭐ <span id="detailRating">N/A</span>/10</div>
+        <div class="verdict" id="detailVerdict">LOADING</div>
+
+        <p id="detailDescription">Loading...</p>
+
+        <div class="info-list">
+          <div><strong data-i18n="director">Director:</strong> <span id="detailDirector"></span></div>
+          <div><strong data-i18n="cast">Cast:</strong> <span id="detailActors"></span></div>
+          <div><strong data-i18n="runtime">Runtime:</strong> <span id="detailRuntime"></span></div>
+          <div><strong data-i18n="language">Language:</strong> <span id="detailLanguage"></span></div>
+          <div><strong data-i18n="votes">Votes:</strong> <span id="detailVotes"></span></div>
+          <div><strong data-i18n="boxOffice">Box Office:</strong> <span id="detailBoxOffice"></span></div>
+        </div>
+
+        <div class="trailer-box" id="trailerBox"></div>
+
+        <!-- USER RATING -->
+        <div class="rating-box">
+          <strong data-i18n="yourRating">Your Rating</strong>
+          <div class="rating-stars" id="ratingStars">
+            <button onclick="submitRating(1)">★</button>
+            <button onclick="submitRating(2)">★</button>
+            <button onclick="submitRating(3)">★</button>
+            <button onclick="submitRating(4)">★</button>
+            <button onclick="submitRating(5)">★</button>
+          </div>
+          <small id="ratingMessage"></small>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="comments-section">
+      <h3 data-i18n="comments">💬 Comments & Reviews</h3>
+
+      <div class="comment-form">
+        <input id="commentName" type="text" placeholder="Your name">
+        <textarea id="commentText" placeholder="Write your comment..."></textarea>
+        <button onclick="submitComment()" data-i18n="postComment">Post Comment</button>
+      </div>
+
+      <div id="commentsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+  <div class="modal-box login-box">
+    <button class="modal-close" onclick="closeLogin()">✕</button>
+
+    <h2 id="loginTitle">Welcome to Lumiere</h2>
+    <p id="loginSubtitle">Sign in to rate movies and share your reviews.</p>
+
+    <input id="loginName" type="text" placeholder="Your name">
+    <input id="loginEmail" type="email" placeholder="Email address">
+
+    <button class="login-submit" onclick="loginUser()">Sign In</button>
+    <p id="loginMessage"></p>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
